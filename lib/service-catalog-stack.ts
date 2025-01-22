@@ -1,4 +1,5 @@
 import * as cdk from "aws-cdk-lib";
+import { Product } from "aws-cdk-lib/aws-servicecatalog";
 import { Construct } from "constructs";
 
 // Create interface for variables with strict typing
@@ -412,8 +413,17 @@ export class ServiceCatalogStack extends cdk.Stack {
 
     // Associate product with portfolio
     portfolio.addProduct(cdkBootstrap);
-
-    // Optional: Add launch constraints if needed
-    // portfolio.setLaunchRole(cdkBootstrap, new cdk.aws_iam.Role(...));
+    portfolio.giveAccessToRole(
+      cdk.aws_iam.Role.fromRoleName(this, "DeveloperRole", "rol-developers")
+    );
+    portfolio.constrainTagUpdates(cdkBootstrap);
+    portfolio.setLaunchRole(
+      cdkBootstrap,
+      cdk.aws_iam.Role.fromRoleName(
+        this,
+        "LaunchRole",
+        "LandingZoneServiceCatalogProductConstraintExecutionRole"
+      )
+    );
   }
 }
