@@ -29,9 +29,16 @@ class CDKBootstrapProduct extends cdk.aws_servicecatalog.ProductStack {
     const DEFAULT_BOUNDARY_POLICY = "boundarypolicy";
     const AWS_MANAGED_KEY = "AWS_MANAGED_KEY";
 
+    // Initialize CloudFormation Parameters
+    const qualifier = new cdk.CfnParameter(this, "Qualifier", {
+      type: "String",
+      description:
+        "An identifier to distinguish multiple bootstrap stacks in the same environment",
+      default: DEFAULT_QUALIFIER,
+    }).valueAsString;
+
     // Destructure props with defaults
     const {
-      qualifier = DEFAULT_QUALIFIER,
       loggingBucketName = DEFAULT_LOGGING_BUCKET,
       permissionsBoundaryPolicyName = DEFAULT_BOUNDARY_POLICY,
       fileAssetsBucketKmsKeyId,
