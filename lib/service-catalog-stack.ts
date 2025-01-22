@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import { Product } from "aws-cdk-lib/aws-servicecatalog";
 import { Construct } from "constructs";
+import { DEFAULT_VALUES } from "./constants";
 
 // Create interface for variables with strict typing
 interface CDKBootstrapStackProps extends cdk.StackProps {
@@ -24,24 +25,18 @@ class CDKBootstrapProduct extends cdk.aws_servicecatalog.ProductStack {
   ) {
     super(scope, id);
 
-    // Use constant values for repeated strings
-    const DEFAULT_QUALIFIER = "hnb659fds";
-    const DEFAULT_LOGGING_BUCKET = "anwb-nl-s3access-lz";
-    const DEFAULT_BOUNDARY_POLICY = "boundarypolicy";
-    const AWS_MANAGED_KEY = "AWS_MANAGED_KEY";
-
     // Initialize CloudFormation Parameters
     const qualifier = new cdk.CfnParameter(this, "Qualifier", {
       type: "String",
       description:
         "An identifier to distinguish multiple bootstrap stacks in the same environment",
-      default: DEFAULT_QUALIFIER,
+      default: DEFAULT_VALUES.QUALIFIER,
     }).valueAsString;
 
     // Destructure props with defaults
     const {
-      loggingBucketName = DEFAULT_LOGGING_BUCKET,
-      permissionsBoundaryPolicyName = DEFAULT_BOUNDARY_POLICY,
+      loggingBucketName = DEFAULT_VALUES.LOGGING_BUCKET,
+      permissionsBoundaryPolicyName = DEFAULT_VALUES.BOUNDARY_POLICY,
       fileAssetsBucketKmsKeyId,
     } = props;
 
@@ -378,8 +373,8 @@ export class ServiceCatalogStack extends cdk.Stack {
 
     // Portfolio with tags
     const portfolio = new cdk.aws_servicecatalog.Portfolio(this, "Portfolio", {
-      displayName: "CCoE-PortFolio",
-      providerName: "CCOE",
+      displayName: "YVZ-CCoE-PortFolio",
+      providerName: "YVZ-CCOE",
       description:
         "Portfolio with list of Applications created by Cloud Center of Enablement",
       messageLanguage: cdk.aws_servicecatalog.MessageLanguage.EN,
@@ -390,15 +385,16 @@ export class ServiceCatalogStack extends cdk.Stack {
     cdk.Tags.of(portfolio).add("Owner", "CCOE");
 
     // Create product using the defined CDKBootstrapProduct class
-    const cdkBootstrap = new cdk.aws_servicecatalog.CloudFormationProduct(
+    const product = new cdk.aws_servicecatalog.CloudFormationProduct(
       this,
       "CDKBootstrap",
       {
         productName: "CDKBootstrap",
-        owner: "CCOE",
+        owner: "YVZ-CCOE",
         productVersions: [
           {
             productVersionName: "v1.0",
+            validateTemplate: true,
             cloudFormationTemplate:
               cdk.aws_servicecatalog.CloudFormationTemplate.fromProductStack(
                 new CDKBootstrapProduct(this, "CDKBootstrapStack")
@@ -407,18 +403,18 @@ export class ServiceCatalogStack extends cdk.Stack {
           },
         ],
         description: "CDKBootstrap is a product that deploys CDKBootstrap",
-        distributor: "CCOE",
+        distributor: "YVZ-CCOE",
       }
     );
 
     // Associate product with portfolio
-    portfolio.addProduct(cdkBootstrap);
+    portfolio.addProduct(product);
     portfolio.giveAccessToRole(
       cdk.aws_iam.Role.fromRoleName(this, "DeveloperRole", "rol-developers")
     );
-    portfolio.constrainTagUpdates(cdkBootstrap);
+    portfolio.constrainTagUpdates(product);
     portfolio.setLaunchRole(
-      cdkBootstrap,
+      product,
       cdk.aws_iam.Role.fromRoleName(
         this,
         "LaunchRole",
