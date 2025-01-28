@@ -3,28 +3,33 @@ import { Construct } from "constructs";
 import { DEFAULT_VALUES } from "./constants";
 
 // Create interface for variables with strict typing
-interface CDKBootstrapStackProps extends cdk.StackProps {
-  trustedAccounts?: string[];
-  trustedAccountsForLookup?: string[];
-  cloudFormationExecutionPolicies?: string[];
-  fileAssetsBucketName?: string;
-  fileAssetsBucketKmsKeyId?: string;
-  containerAssetsRepositoryName?: string;
-  qualifier?: string;
-  bootstrapVariant?: string;
-  loggingBucketName?: string;
-  permissionsBoundaryPolicyName?: string;
-}
+// Import interface from types directory
+import { ICDKBootstrapStackProps } from "./types";
 
+/**
+ * CDKBootstrapProduct represents a Service Catalog product for CDK Bootstrap configuration
+ * @extends cdk.aws_servicecatalog.ProductStack
+ */
 export class CDKBootstrapProduct extends cdk.aws_servicecatalog.ProductStack {
+  private readonly parameters: Map<string, cdk.CfnParameter> = new Map();
+
+  public getParameter(name: string): cdk.CfnParameter {
+    const param = this.parameters.get(name);
+    if (!param) {
+      throw new Error(`Parameter ${name} not found`);
+    }
+    return param;
+  }
   constructor(
     scope: Construct,
     id: string,
-    props: CDKBootstrapStackProps = {}
+    props: ICDKBootstrapStackProps = {}
   ) {
     super(scope, id);
 
-    // Initialize CloudFormation Parameters
+    /**
+     * Initialize CloudFormation Parameters
+     */
     const qualifier = new cdk.CfnParameter(this, "Qualifier", {
       type: "String",
       description:

@@ -1,4 +1,6 @@
-export const DEFAULT_VALUES = {
+import { IDefaultValues } from './types/constants.types';
+
+export const DEFAULT_VALUES: IDefaultValues = {
   QUALIFIER: "hnb659fds",
   LOGGING_BUCKET: "anwb-nl-s3access-lz",
   BOUNDARY_POLICY: "boundarypolicy",
